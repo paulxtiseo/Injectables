@@ -1,0 +1,13 @@
+error[E0433]: failed to resolve: could not find `invalid` in the crate root
+ --> tests/fail/invalid_visibility_restriction.rs:8:19
+  |
+8 |     pub(in crate::invalid::path) field: String,  // invalid visibility path
+  |                   ^^^^^^^ could not find `invalid` in the crate root
+
+error: Cannot access field 'field' with visibility Restricted("crate :: invalid :: path") from module 'inner' in module ''
+  --> tests/fail/invalid_visibility_restriction.rs:12:1
+   |
+12 | #[inject_fields(inner::Restricted)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `inject_fields` (in Nightly builds, run with -Z macro-backtrace for more info)

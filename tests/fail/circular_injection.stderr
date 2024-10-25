@@ -1,0 +1,15 @@
+error: Cannot inject fields from 'B' as this type does not exist
+ --> tests/fail/circular_injection.rs:4:1
+  |
+4 | #[inject_fields(B)]
+  | ^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `inject_fields` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: Circular injection chain detected: B already depends on A
+  --> tests/fail/circular_injection.rs:10:1
+   |
+10 | #[inject_fields(A)]
+   | ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `inject_fields` (in Nightly builds, run with -Z macro-backtrace for more info)

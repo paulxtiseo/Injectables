@@ -1,0 +1,10 @@
+error[E0124]: field `id` is already declared
+  --> tests/fail/duplicate_properties.rs:8:1
+   |
+8  | #[inject_fields(Base)]
+   | ^^^^^^^^^^^^^^^^^^^^^^ field already declared
+9  | pub struct Conflict {
+10 |   pub id: u32,  // Should fail because 'id' is already injected
+   |   ----------- `id` first declared here
+   |
+   = note: this error originates in the attribute macro `inject_fields` (in Nightly builds, run with -Z macro-backtrace for more info)

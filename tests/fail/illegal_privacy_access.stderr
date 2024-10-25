@@ -1,0 +1,27 @@
+error: Cannot access field 'id' with visibility Private from module 'other_module' in module ''
+  --> tests/fail/illegal_privacy_access.rs:13:1
+   |
+13 | #[inject_fields(other_module::Private)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `inject_fields` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0422]: cannot find struct, variant or union type `IllegalAccess` in this scope
+  --> tests/fail/illegal_privacy_access.rs:19:16
+   |
+19 |     let test = IllegalAccess {
+   |                ^^^^^^^^^^^^^ not found in this scope
+
+warning: unused import: `injectable`
+ --> tests/fail/illegal_privacy_access.rs:1:19
+  |
+1 | use injectables::{injectable, inject_fields};
+  |                   ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `inject_fields`
+ --> tests/fail/illegal_privacy_access.rs:4:35
+  |
+4 |     use injectables::{injectable, inject_fields};
+  |                                   ^^^^^^^^^^^^^

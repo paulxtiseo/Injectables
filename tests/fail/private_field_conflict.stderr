@@ -1,0 +1,7 @@
+error: Conflicting visibility for field 'id': cannot have both private and public fields with the same name
+  --> tests/fail/private_field_conflict.rs:13:1
+   |
+13 | #[inject_fields(Base, Derived)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `inject_fields` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -1,0 +1,13 @@
+error: Recursive injection detected: RecursiveStruct tries to inject from itself
+ --> tests/fail/recursive_injection.rs:4:1
+  |
+4 | #[inject_fields(RecursiveStruct)]  // Tries to inject its own fields
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `inject_fields` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0422]: cannot find struct, variant or union type `RecursiveStruct` in this scope
+  --> tests/fail/recursive_injection.rs:10:14
+   |
+10 |   let test = RecursiveStruct {
+   |              ^^^^^^^^^^^^^^^ not found in this scope

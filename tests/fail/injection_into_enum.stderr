@@ -1,0 +1,7 @@
+error: Only structs are supported as injection targets
+ --> tests/fail/injection_into_enum.rs:8:1
+  |
+8 | #[inject_fields(Base)]
+  | ^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `inject_fields` (in Nightly builds, run with -Z macro-backtrace for more info)

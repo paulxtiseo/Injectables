@@ -1,0 +1,23 @@
+[package]
+name = "injectables"
+version = "0.1.0"
+edition = "2021"
+description = "A procedural macro library that enables field injection between Rust structs through #[injectable] and #[inject_fields] attributes. The library handles visibility rules, generic type resolution, and detects circular dependencies during compile time to ensure safe composition. This enables a declarative approach to struct composition where fields from one or more source structs can be automatically injected into target structs while respecting Rust's ownership and visibility rules."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/paulxtiseo/injectables"
+documentation = "https://docs.rs/injectables"
+readme = "README.md"
+keywords = ["proc-macro", "injection", "field-injection"]
+categories = ["development-tools", "rust-patterns"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "2.0", features = ["full", "extra-traits"] }
+quote = "1.0"
+proc-macro2 = { version = "1.0", features = ["span-locations"] }
+lazy_static = "1.4"
+
+[dev-dependencies]
+trybuild = "1.0"
