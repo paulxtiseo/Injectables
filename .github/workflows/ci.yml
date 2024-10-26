@@ -33,7 +33,7 @@ jobs:
         run: cargo +nightly fmt -- --check
 
       - name: Clippy
-        run: cargo clippy -- -D warnings
+        run: cargo +stable clippy -- -D warnings
 
   build:
     name: Build
