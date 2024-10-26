@@ -25,10 +25,10 @@ use quote::quote;
 /// # use crate::error::compile_error;
 /// let error = compile_error("Invalid field injection");
 /// ```
-pub fn compile_error(msg: &str) -> TokenStream {
+pub fn compile_error(msg:&str) -> TokenStream {
   TokenStream::from(quote! {
-        compile_error!(#msg);
-    })
+      compile_error!(#msg);
+  })
 }
 
 /* Commented implementation for potential future use

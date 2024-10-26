@@ -43,7 +43,7 @@ pub enum VisibilityKind {
 /// let vis: Visibility = syn::parse_quote!(pub);
 /// let kind = visibility_to_kind(&vis);
 /// ```
-pub fn visibility_to_kind(vis: &Visibility) -> VisibilityKind {
+pub fn visibility_to_kind(vis:&Visibility) -> VisibilityKind {
   match vis {
     Visibility::Public(_) => VisibilityKind::Public,
     Visibility::Inherited => VisibilityKind::Private,
@@ -70,7 +70,7 @@ pub fn visibility_to_kind(vis: &Visibility) -> VisibilityKind {
 /// # use crate::visibility::{VisibilityKind, kind_to_visibility};
 /// let vis = kind_to_visibility(&VisibilityKind::Public);
 /// ```
-pub fn kind_to_visibility(kind: &VisibilityKind) -> Visibility {
+pub fn kind_to_visibility(kind:&VisibilityKind) -> Visibility {
   match kind {
     VisibilityKind::Public => syn::parse_quote!(pub),
     VisibilityKind::Private => Visibility::Inherited,
@@ -80,13 +80,12 @@ pub fn kind_to_visibility(kind: &VisibilityKind) -> Visibility {
         "super" => syn::parse_quote!(pub(super)),
         "self" => syn::parse_quote!(pub(self)),
         _ => {
-          let path: syn::Path = syn::parse_str(path_str)
-            .unwrap_or_else(|_| syn::parse_quote!(self));
+          let path:syn::Path = syn::parse_str(path_str).unwrap_or_else(|_| syn::parse_quote!(self));
           Visibility::Restricted(syn::VisRestricted {
-            pub_token: syn::token::Pub::default(),
-            paren_token: syn::token::Paren::default(),
-            in_token: Some(syn::token::In::default()),
-            path: Box::new(path),
+            pub_token:  syn::token::Pub::default(),
+            paren_token:syn::token::Paren::default(),
+            in_token:   Some(syn::token::In::default()),
+            path:       Box::new(path),
           })
         }
       }
@@ -120,11 +119,7 @@ pub fn kind_to_visibility(kind: &VisibilityKind) -> Visibility {
 /// );
 /// assert!(can_access);
 /// ```
-pub fn can_access_field(
-  vis: &VisibilityKind,
-  target_module: &str,
-  source_module: &str,
-) -> bool {
+pub fn can_access_field(vis:&VisibilityKind, target_module:&str, source_module:&str) -> bool {
   match vis {
     VisibilityKind::Public => true,
     VisibilityKind::Private => {
@@ -133,19 +128,21 @@ pub fn can_access_field(
         true
       } else {
         let same_module = source_module == target_module;
-        let is_child = source_module.starts_with(target_module)
-          && source_module[target_module.len()..].starts_with("::");
+        let is_child =
+          source_module.starts_with(target_module) && source_module[target_module.len()..].starts_with("::");
         same_module || is_child
       }
     }
-    VisibilityKind::Restricted(restriction) => match restriction.as_str() {
-      "crate" => true,
-      "super" => source_module.starts_with(target_module),
-      "self" => target_module == source_module,
-      path => {
-        let path = path.trim_start_matches("in ");
-        source_module.starts_with(path)
+    VisibilityKind::Restricted(restriction) => {
+      match restriction.as_str() {
+        "crate" => true,
+        "super" => source_module.starts_with(target_module),
+        "self" => target_module == source_module,
+        path => {
+          let path = path.trim_start_matches("in ");
+          source_module.starts_with(path)
+        }
       }
-    },
+    }
   }
 }

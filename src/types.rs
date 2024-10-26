@@ -1,6 +1,6 @@
 //! Core type definitions and parsing implementations for field injection.
 //!
-//! This module defines the fundamental data structures and parsing traits used 
+//! This module defines the fundamental data structures and parsing traits used
 //! throughout the crate for managing field injection, including module information,
 //! field definitions, and configuration parsing.
 
@@ -17,8 +17,8 @@ use syn::parse::{Parse, ParseStream};
 /// * `module_path` - Full path to the module containing the struct
 #[derive(Clone, Debug)]
 pub struct ModuleInfo {
-  pub fields: Vec<FieldDef>,
-  pub module_path: String,
+  pub fields:     Vec<FieldDef>,
+  pub module_path:String,
 }
 
 /// Definition of an injectable field.
@@ -47,10 +47,10 @@ pub struct ModuleInfo {
 /// ```
 #[derive(Clone, Debug)]
 pub struct FieldDef {
-  pub name: String,
-  pub ty: String,
-  pub vis: super::visibility::VisibilityKind,
-  pub generic_params: Vec<String>,
+  pub name:          String,
+  pub ty:            String,
+  pub vis:           super::visibility::VisibilityKind,
+  pub generic_params:Vec<String>,
 }
 
 /// Type information for a field during processing.
@@ -65,8 +65,8 @@ pub struct FieldDef {
 /// * `vis` - Visibility of the field
 #[derive(Debug, Clone)]
 pub struct FieldTypeInfo {
-  pub name: String,
-  pub ty: String,
+  pub name:String,
+  pub ty:  String,
   pub vis: super::visibility::VisibilityKind,
 }
 
@@ -86,13 +86,13 @@ pub struct FieldTypeInfo {
 /// // would parse into an InjectConfig containing two TypePaths
 /// ```
 pub struct InjectConfig {
-  pub structs: Vec<syn::TypePath>,
+  pub structs:Vec<syn::TypePath>,
 }
 
 impl Parse for InjectConfig {
-  fn parse(input: ParseStream) -> syn::Result<Self> {
+  fn parse(input:ParseStream) -> syn::Result<Self> {
     Ok(InjectConfig {
-      structs: input
+      structs:input
         .parse_terminated(syn::TypePath::parse, syn::Token![,])?
         .into_iter()
         .collect(),
@@ -115,7 +115,5 @@ impl Parse for InjectConfig {
 pub struct InjectionError(pub String);
 
 impl From<String> for InjectionError {
-  fn from(msg: String) -> Self {
-    InjectionError(msg)
-  }
+  fn from(msg:String) -> Self { InjectionError(msg) }
 }

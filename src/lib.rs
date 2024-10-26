@@ -97,19 +97,21 @@
 //! 4. Injected fields maintain their original visibility rules
 //! 5. Generic types require concrete type specifications in `#[inject_fields]`
 
+mod error;
 mod registry;
 mod types;
 mod visibility;
-mod error;
 
 use proc_macro::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{parse_macro_input, DeriveInput};
 
-use crate::error::compile_error;
-use crate::registry::{check_and_update_injection_chain, validate_and_process_input, update_module_paths};
-use crate::types::{InjectConfig, ModuleInfo};
-use crate::visibility::visibility_to_kind;
+use crate::{
+  error::compile_error,
+  registry::{check_and_update_injection_chain, update_module_paths, validate_and_process_input},
+  types::{InjectConfig, ModuleInfo},
+  visibility::visibility_to_kind,
+};
 
 /// Marks a struct as injectable, allowing its fields to be injected into other structs.
 ///
@@ -157,12 +159,12 @@ use crate::visibility::visibility_to_kind;
 /// - Applied to an enum or union instead of a struct
 /// - Applied to a tuple struct (must use named fields)
 #[proc_macro_attribute]
-pub fn injectable(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn injectable(_attr:TokenStream, item:TokenStream) -> TokenStream {
   let item_clone = item.clone();
   let input = parse_macro_input!(item as DeriveInput);
   let struct_name = input.ident.to_string();
 
-  let generic_params: Vec<String> = input
+  let generic_params:Vec<String> = input
     .generics
     .params
     .iter()
@@ -176,10 +178,12 @@ pub fn injectable(_attr: TokenStream, item: TokenStream) -> TokenStream {
     .collect();
 
   let fields = match &input.data {
-    syn::Data::Struct(data) => match &data.fields {
-      syn::Fields::Named(fields) => fields,
-      _ => return compile_error("Only named fields are supported"),
-    },
+    syn::Data::Struct(data) => {
+      match &data.fields {
+        syn::Fields::Named(fields) => fields,
+        _ => return compile_error("Only named fields are supported"),
+      }
+    }
     _ => return compile_error("Only structs are supported"),
   };
 
@@ -193,16 +197,16 @@ pub fn injectable(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
       types::FieldDef {
         name,
-        ty: f.ty.to_token_stream().to_string(),
+        ty:f.ty.to_token_stream().to_string(),
         vis,
-        generic_params: generic_params.clone(),
+        generic_params:generic_params.clone(),
       }
     })
     .collect();
 
   let module_info = ModuleInfo {
-    fields: field_defs,
-    module_path: String::new(), // Will be populated when used in inject_fields
+    fields:     field_defs,
+    module_path:String::new(), // Will be populated when used in inject_fields
   };
 
   registry.insert(struct_name, module_info);
@@ -267,13 +271,13 @@ pub fn injectable(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///
 /// This attribute will fail to compile if:
 /// - A source struct is not marked as `#[injectable]`
-/// - There are circular dependencies between structs 
+/// - There are circular dependencies between structs
 /// - Field names conflict between multiple sources
 /// - Visibility rules are violated
 /// - Applied to an enum or tuple struct
 /// - Generic type parameters are not fully specified
 #[proc_macro_attribute]
-pub fn inject_fields(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn inject_fields(attr:TokenStream, item:TokenStream) -> TokenStream {
   let config = parse_macro_input!(attr as InjectConfig);
   let mut input = parse_macro_input!(item as DeriveInput);
   let target_name = input.ident.to_string();
@@ -294,7 +298,8 @@ pub fn inject_fields(attr: TokenStream, item: TokenStream) -> TokenStream {
 
   // If we have validation errors, return them
   if !errors.is_empty() {
-    return errors.into_iter()
+    return errors
+      .into_iter()
       .map(|e| compile_error(&e))
       .fold(TokenStream::new(), |mut acc, err| {
         acc.extend(std::iter::once(err));
@@ -309,10 +314,12 @@ pub fn inject_fields(attr: TokenStream, item: TokenStream) -> TokenStream {
 
   // Process the rest as before...
   let fields = match &mut input.data {
-    syn::Data::Struct(data) => match &mut data.fields {
-      syn::Fields::Named(fields) => fields,
-      _ => return compile_error("Only named fields are supported"),
-    },
+    syn::Data::Struct(data) => {
+      match &mut data.fields {
+        syn::Fields::Named(fields) => fields,
+        _ => return compile_error("Only named fields are supported"),
+      }
+    }
     _ => return compile_error("Only structs are supported as injection targets"),
   };
 
@@ -321,12 +328,7 @@ pub fn inject_fields(attr: TokenStream, item: TokenStream) -> TokenStream {
   let chains_clone = chains.clone();
   drop(chains);
 
-  match registry::process_type_paths(
-    config.structs,
-    fields,
-    &registry_clone,
-    &chains_clone,
-  ) {
+  match registry::process_type_paths(config.structs, fields, &registry_clone, &chains_clone) {
     Ok(_) => TokenStream::from(quote!(#input)),
     Err(e) => compile_error(&e),
   }

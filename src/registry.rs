@@ -21,25 +21,27 @@
 //!    - Maps target structs to their dependencies (direct and transitive)
 //!    - Ensures valid injection chains during compilation
 
-use std::collections::{HashMap, HashSet, VecDeque};
-use std::sync::Mutex;
+use std::{
+  collections::{HashMap, HashSet, VecDeque},
+  sync::Mutex,
+};
 
 use lazy_static::lazy_static;
 use proc_macro2::Span;
 use quote::ToTokens;
 use syn::Field;
 
-use crate::types::{FieldDef, FieldTypeInfo, InjectionError, ModuleInfo};
-use crate::visibility::{can_access_field, kind_to_visibility};
+use crate::{
+  types::{FieldDef, FieldTypeInfo, InjectionError, ModuleInfo},
+  visibility::{can_access_field, kind_to_visibility},
+};
 
 lazy_static! {
-    pub static ref FIELD_REGISTRY: Mutex<HashMap<String, ModuleInfo>> =
-        Mutex::new(HashMap::new());
+  pub static ref FIELD_REGISTRY: Mutex<HashMap<String, ModuleInfo>> = Mutex::new(HashMap::new());
 }
 
 lazy_static! {
-    pub static ref INJECTION_CHAINS: Mutex<HashMap<String, HashSet<String>>> =
-        Mutex::new(HashMap::new());
+  pub static ref INJECTION_CHAINS: Mutex<HashMap<String, HashSet<String>>> = Mutex::new(HashMap::new());
 }
 
 /// Validates and updates the injection dependency chain for a new injection.
@@ -68,10 +70,7 @@ lazy_static! {
 /// let err = check_and_update_injection_chain("Source", "Target");
 /// assert!(err.is_err());
 /// ```
-pub fn check_and_update_injection_chain(
-  target: &str,
-  source: &str,
-) -> Result<(), String> {
+pub fn check_and_update_injection_chain(target:&str, source:&str) -> Result<(), String> {
   let mut chains = INJECTION_CHAINS.lock().unwrap();
 
   // Check for direct recursion
@@ -123,7 +122,7 @@ pub fn check_and_update_injection_chain(
 /// let type_path = parse_quote!(crate::models::User);
 /// assert_eq!(get_path_from_type(&type_path), "crate::models");
 /// ```
-pub fn get_path_from_type(type_path: &syn::TypePath) -> String {
+pub fn get_path_from_type(type_path:&syn::TypePath) -> String {
   let mut module_path = String::new();
   let segments = &type_path.path.segments;
   let segment_count = segments.len();
@@ -163,13 +162,13 @@ pub fn get_path_from_type(type_path: &syn::TypePath) -> String {
 /// * `Ok(())` if processing succeeds
 /// * `Err(String)` with an error message if any validation fails
 pub fn process_type_paths(
-  type_paths: Vec<syn::TypePath>,
-  fields: &mut syn::FieldsNamed,
-  registry: &HashMap<String, ModuleInfo>,
-  chains: &HashMap<String, HashSet<String>>,
+  type_paths:Vec<syn::TypePath>,
+  fields:&mut syn::FieldsNamed,
+  registry:&HashMap<String, ModuleInfo>,
+  chains:&HashMap<String, HashSet<String>>,
 ) -> Result<(), String> {
   let mut added_fields = HashSet::new();
-  let mut field_types: HashMap<String, FieldTypeInfo> = HashMap::new();
+  let mut field_types:HashMap<String, FieldTypeInfo> = HashMap::new();
 
   for type_path in type_paths {
     let last_segment = type_path.path.segments.last().unwrap();
@@ -200,8 +199,8 @@ pub fn process_type_paths(
         field_types.insert(
           field.name.clone(),
           FieldTypeInfo {
-            name: field.name.clone(),
-            ty: ty_str,
+            name:field.name.clone(),
+            ty:  ty_str,
             vis: field.vis.clone(),
           },
         );
@@ -238,9 +237,9 @@ pub fn process_type_paths(
 /// * `Ok(Vec<FieldDef>)` with collected fields
 /// * `Err(String)` if an error occurs during collection
 fn collect_fields(
-  start_struct: &str,
-  registry: &HashMap<String, ModuleInfo>,
-  chains: &HashMap<String, HashSet<String>>,
+  start_struct:&str,
+  registry:&HashMap<String, ModuleInfo>,
+  chains:&HashMap<String, HashSet<String>>,
 ) -> Result<Vec<FieldDef>, String> {
   let mut all_fields = Vec::new();
   let mut visited = HashSet::new();
@@ -289,13 +288,13 @@ fn collect_fields(
 /// * `Ok(())` if processing succeeds
 /// * `Err(String)` with an error message if processing fails
 fn process_fields(
-  struct_name: &str,
-  all_fields: Vec<FieldDef>,
-  added_fields: &mut HashSet<String>,
-  target_module: &str,
-  registry: &HashMap<String, ModuleInfo>,
-  last_segment: &syn::PathSegment,
-  named_fields: &mut syn::punctuated::Punctuated<Field, syn::Token![,]>,
+  struct_name:&str,
+  all_fields:Vec<FieldDef>,
+  added_fields:&mut HashSet<String>,
+  target_module:&str,
+  registry:&HashMap<String, ModuleInfo>,
+  last_segment:&syn::PathSegment,
+  named_fields:&mut syn::punctuated::Punctuated<Field, syn::Token![,]>,
 ) -> Result<(), String> {
   for field in all_fields {
     if !added_fields.insert(field.name.clone()) {
@@ -303,16 +302,12 @@ fn process_fields(
     }
 
     let field_info = FieldTypeInfo {
-      name: field.name.clone(),
-      ty: process_field_type(&field, last_segment),
+      name:field.name.clone(),
+      ty:  process_field_type(&field, last_segment),
       vis: field.vis.clone(),
     };
 
-    if !can_access_field(
-      &field_info.vis,
-      &registry[struct_name].module_path,
-      target_module,
-    ) {
+    if !can_access_field(&field_info.vis, &registry[struct_name].module_path, target_module) {
       return Err(format!(
         "Cannot access field '{}' with visibility {:?} from module '{}' in module '{}'",
         field_info.name, field_info.vis, registry[struct_name].module_path, target_module
@@ -320,16 +315,16 @@ fn process_fields(
     }
 
     let name = syn::Ident::new(&field_info.name, Span::call_site());
-    let ty: syn::Type = syn::parse_str(&field_info.ty)
-      .unwrap_or_else(|_| panic!("Failed to parse type: {}", field_info.ty));
+    let ty:syn::Type =
+      syn::parse_str(&field_info.ty).unwrap_or_else(|_| panic!("Failed to parse type: {}", field_info.ty));
 
     // Create and add the new field
     let new_field = Field {
-      attrs: vec![],
-      vis: kind_to_visibility(&field_info.vis),
-      mutability: syn::FieldMutability::None,
-      ident: Some(name),
-      colon_token: Some(Default::default()),
+      attrs:vec![],
+      vis:kind_to_visibility(&field_info.vis),
+      mutability:syn::FieldMutability::None,
+      ident:Some(name),
+      colon_token:Some(Default::default()),
       ty,
     };
 
@@ -348,7 +343,7 @@ fn process_fields(
 /// # Returns
 ///
 /// String representation of the resolved type
-fn process_field_type(field: &FieldDef, last_segment: &syn::PathSegment) -> String {
+fn process_field_type(field:&FieldDef, last_segment:&syn::PathSegment) -> String {
   if field.generic_params.is_empty() {
     return field.ty.clone();
   }
@@ -379,19 +374,21 @@ fn process_field_type(field: &FieldDef, last_segment: &syn::PathSegment) -> Stri
 /// * `Ok(())` if validation succeeds
 /// * `Err(InjectionError)` if validation fails
 pub fn validate_and_process_input(
-  input: &mut syn::DeriveInput,
-  type_paths: &[syn::TypePath],
+  input:&mut syn::DeriveInput,
+  type_paths:&[syn::TypePath],
 ) -> Result<(), InjectionError> {
   match &mut input.data {
-    syn::Data::Struct(data) => match &mut data.fields {
-      syn::Fields::Named(_) => Ok(()),
-      _ => Err(InjectionError(
-        "Only named fields are supported".to_string(),
-      )),
-    },
-    _ => Err(InjectionError(
-      "Only structs are supported as injection targets".to_string(),
-    )),
+    syn::Data::Struct(data) => {
+      match &mut data.fields {
+        syn::Fields::Named(_) => Ok(()),
+        _ => Err(InjectionError("Only named fields are supported".to_string())),
+      }
+    }
+    _ => {
+      Err(InjectionError(
+        "Only structs are supported as injection targets".to_string(),
+      ))
+    }
   }?;
 
   for type_path in type_paths {
@@ -431,9 +428,7 @@ pub fn validate_and_process_input(
 /// let type_paths: Vec<syn::TypePath> = vec![parse_quote!(models::User)];
 /// let result = update_module_paths(&type_paths);
 /// ```
-pub fn update_module_paths(
-  type_paths: &[syn::TypePath],
-) -> Result<(), InjectionError> {
+pub fn update_module_paths(type_paths:&[syn::TypePath]) -> Result<(), InjectionError> {
   let mut registry = FIELD_REGISTRY.lock().unwrap();
 
   for type_path in type_paths {
